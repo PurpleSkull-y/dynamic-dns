@@ -1,0 +1,35 @@
+ip_file="/home/psy/scripts/d-dns/ip.txt"
+data_file="/home/psy/scripts/d-dns/data.txt"
+ip0=$(curl -s https://ipinfo.io/ip)
+
+# Check if the file exists
+if [ -e "$ip_file" ] && [ -e "$data_file" ]; then
+    source "$ip_file"
+    source "$data_file"
+else
+    echo "ip1=$ip0" > "$ip_file"
+
+    echo "host1=a" > "$data_file"
+    echo "host2=a" >> "$data_file"
+    echo "domain_name=a" >> "$data_file"
+    echo "ddns_password=a" >> "$data_file"
+    #echo "your_ip=a" >> "$data_file"
+fi
+
+if [ $ip0 != $ip1 ]; 
+  then
+      echo "The IP has changed, sending update request to the DNS server..."
+      echo "Please wait..."
+      echo "https://dynamicdns.park-your-domain.com/update?host=$host1&domain=$domain_name&password=$ddns_password"
+
+
+      curl "https://dynamicdns.park-your-domain.com/update?host=$host1&domain=$domain_name&password=$ddns_password"
+      curl "https://dynamicdns.park-your-domain.com/update?host=$host2&domain=$domain_name&password=$ddns_password"
+      echo "ip1=$ip0" > "$ip_file"
+  else
+      echo "The IP has not changed, nothing to do."
+fi
+
+
+
+
