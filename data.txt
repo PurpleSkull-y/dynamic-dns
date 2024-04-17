@@ -1,5 +1,0 @@
-host1=www
-host2=@
-domain_name=
-ddns_password=
-your_ip=a

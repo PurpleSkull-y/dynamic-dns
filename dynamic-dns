@@ -1,35 +1,56 @@
-ip_file="/home/psy/scripts/d-dns/ip.txt"
-data_file="/home/psy/scripts/d-dns/data.txt"
+# History of a ip to make a comparation
+ip_file="./ip.txt"
+# Text file where all the credentials will be stored
+data_file="./data.txt"
+# API service to get the public ip
 ip0=$(curl -s https://ipinfo.io/ip)
+ip1=0
 
-# Check if the file exists
-if [ -e "$ip_file" ] && [ -e "$data_file" ]; then
-    source "$ip_file"
-    source "$data_file"
+# Check if the file ip.txt exists
+if [ -e "$ip_file" ]; then
+
+	source "$ip_file"
+
+# If the files doesn't exist, creates it with the template of it
 else
-    echo "ip1=$ip0" > "$ip_file"
 
-    echo "host1=a" > "$data_file"
-    echo "host2=a" >> "$data_file"
-    echo "domain_name=a" >> "$data_file"
-    echo "ddns_password=a" >> "$data_file"
-    #echo "your_ip=a" >> "$data_file"
+	echo "ip1=$ip0" > "$ip_file"
+
+ fi
+
+# Check if the file data.txt exists
+if [ -e "$data_file" ]; then
+
+
+	source "$data_file"
+
+# If the files doesn't exist, creates it with the template of it
+else
+	echo "# for more information read https://www.namecheap.com/support/knowledgebase/article.aspx/29/11/how-to-dynamically-update-the-hosts-ip-with-an-https-request/" > "$data_file" 
+	echo "host1=insert-your-host1" >> "$data_file"
+	echo "host2=insert-your-host2" >> "$data_file"
+	echo "domain_name=insert-your-domain-name" >> "$data_file"
+	echo "ddns_password=insert-your-dynamic-dns-token" >> "$data_file"
+
 fi
 
-if [ $ip0 != $ip1 ]; 
-  then
-      echo "The IP has changed, sending update request to the DNS server..."
-      echo "Please wait..."
-      echo "https://dynamicdns.park-your-domain.com/update?host=$host1&domain=$domain_name&password=$ddns_password"
+
+if [ $ip0 != $ip1 ] && [ $ip1 != 0 ]; then
+
+	echo "The IP has changed, sending update request to the DNS server..."
+	echo "Please wait..."
+	echo "https://dynamicdns.park-your-domain.com/update?host=$host1&domain=$domain_name&password=$ddns_password"
 
 
-      curl "https://dynamicdns.park-your-domain.com/update?host=$host1&domain=$domain_name&password=$ddns_password"
-      curl "https://dynamicdns.park-your-domain.com/update?host=$host2&domain=$domain_name&password=$ddns_password"
-      echo "ip1=$ip0" > "$ip_file"
-  else
-      echo "The IP has not changed, nothing to do."
+	curl "https://dynamicdns.park-your-domain.com/update?host=$host1&domain=$domain_name&password=$ddns_password"
+	curl "https://dynamicdns.park-your-domain.com/update?host=$host2&domain=$domain_name&password=$ddns_password"
+	echo "ip1=$ip0" > "$ip_file"
+
+else
+
+	echo "No new ip detected, nothing to do."
+		
+
 fi
-
-
 
 
