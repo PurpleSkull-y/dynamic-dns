@@ -2,6 +2,9 @@
 ip_file="./ip.txt"
 # Text file where all the credentials will be stored
 data_file="./data.txt"
+# Logs of the dynamic dns status and changes
+logs_file="./log.txt"
+
 # API service to get the public ip
 ip0=$(curl -s https://ipinfo.io/ip)
 ip1=0
@@ -23,6 +26,8 @@ if [ -e "$data_file" ]; then
 
 
 	source "$data_file"
+#Creates array of the hosts
+readarray -t host_list < <(grep "host[0-9]" $data_file | cut -d "=" -f 2)
 
 # If the files doesn't exist, creates it with the template of it
 else
@@ -35,22 +40,21 @@ else
 fi
 
 
-if [ $ip0 != $ip1 ] && [ $ip1 != 0 ]; then
+for host in "${host_list[@]}"; do
 
-	echo "The IP has changed, sending update request to the DNS server..."
-	echo "Please wait..."
-	echo "https://dynamicdns.park-your-domain.com/update?host=$host1&domain=$domain_name&password=$ddns_password"
+	if [ $ip0 != $ip1 ] && [ $ip1 != 0 ]; then
 
+		echo "The current ip ($ip1) has changed, sending update request to the DNS server with the new ip($ip0)..."
+		echo "Please wait..."
+		curl "https://dynamicdns.park-your-domain.com/update?host=$host&domain=$domain_name&password=$ddns_password"
+		echo "ip1=$ip0" > "$ip_file"
 
-	curl "https://dynamicdns.park-your-domain.com/update?host=$host1&domain=$domain_name&password=$ddns_password"
-	curl "https://dynamicdns.park-your-domain.com/update?host=$host2&domain=$domain_name&password=$ddns_password"
-	echo "ip1=$ip0" > "$ip_file"
+	else
 
-else
-
-	echo "No new ip detected, nothing to do."
+		echo "No new ip detected for the host $host, nothing to do."
 		
 
-fi
+	fi
+done
 
 
